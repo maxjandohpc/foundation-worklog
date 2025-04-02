@@ -1,0 +1,37 @@
+import java.text.SimpleDateFormat
+
+GString projectPath = "$projectDir/documentation/"
+File fileToAdd
+
+
+
+task createFileForToday() {
+
+    int currentYear = Calendar.getInstance().get(Calendar.YEAR)
+    String currentMonth = Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US)
+
+    GString currentYearAndMonth = "$projectPath/$currentYear/$currentMonth"
+    File yearFolder = new File(currentYearAndMonth)
+
+    if (!yearFolder.exists()) {
+        yearFolder.mkdirs()
+    }
+    SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd")
+
+    GString today = "${format1.format(Calendar.getInstance().time)}"
+    fileToAdd = new File("${currentYearAndMonth}/${today}.md")
+    if (!fileToAdd.exists()) {
+        fileToAdd << "# $today"
+        fileToAdd << "\n\n## Topic 1\n\n## Topic 2\n\n## Topic 3"
+    }
+}
+
+task gitAdd(type: Exec, dependsOn: createFileForToday) {
+    logger.info("task git executing")
+    description 'Pulls git.'
+    commandLine "git", "add", fileToAdd.absolutePath
+}
+
+task createTodayLogEntryAndAddIt(dependsOn: gitAdd){
+
+}
